@@ -7,8 +7,8 @@ import config from './config';
 
 const setupSwagger = (app: INestApplication) => {
 	const options = new DocumentBuilder()
-		.setTitle('Alap Communication Service')
-		.setDescription('HTTP API docs for Alap Communication Service')
+		.setTitle('Alap Auth Service')
+		.setDescription('HTTP API docs for Alap Auth Service')
 		.addBearerAuth({
 			description: 'User JWT Token',
 			type: 'http',
