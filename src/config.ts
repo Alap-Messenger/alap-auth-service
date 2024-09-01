@@ -7,6 +7,10 @@ export interface IMongoConfig {
 	mongodbHost: string;
 	dbName: string;
 }
+export interface IRedisConfig {
+	redisHost: string;
+	redisPort: string;
+}
 
 const getMongoConfig = (): IMongoConfig => {
 	return {
@@ -16,22 +20,42 @@ const getMongoConfig = (): IMongoConfig => {
 		dbName: process.env.MONGODB_DB_NAME,
 	};
 };
+const getRedisConfig = (): IRedisConfig => {
+	return {
+		redisHost: process.env.REDIS_HOST,
+		redisPort: process.env.REDIS_PORT,
+	};
+};
 
 export interface IConfig {
 	port: number;
 	mongoURL: string;
+	redisURL: string;
+	redisHost: string;
+	redisPort: number;
 }
 
 dotenv.config();
 
 const config = (): IConfig => {
 	const mongoConfig = getMongoConfig();
+	const redisConfig = getRedisConfig();
+
 	const { mongodbUsername, mongodbPassword, mongodbHost, dbName } = mongoConfig;
+	const { redisHost, redisPort } = redisConfig;
+
 	const mongoURL = `mongodb+srv://${mongodbUsername}:${mongodbPassword}@${mongodbHost}/${dbName}`;
+	const redisURL = `redis://${redisHost}:${redisPort}`;
+
+	if (!redisURL || redisURL === '') throw new error('Redis url is required');
 	if (!mongoURL || mongoURL === '') throw new error('MongoDB url is required');
+
 	return {
 		port: parseInt(process.env.PORT, 10) || 3000,
 		mongoURL,
+		redisURL,
+		redisHost,
+		redisPort: parseInt(redisPort, 10),
 	};
 };
 

@@ -4,6 +4,8 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import config from './config';
+import { AllExceptionsFilter, GlobalResponseTransformer } from './utils/response/exception';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 const setupSwagger = (app: INestApplication) => {
 	const options = new DocumentBuilder()
@@ -28,10 +30,22 @@ async function bootstrap() {
 	const logger = new Logger('Startup', { timestamp: true });
 	const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
+	app.connectMicroservice<MicroserviceOptions>({
+		transport: Transport.REDIS,
+		options: {
+			host: config.redisHost,
+			port: config.redisPort,
+		},
+	});
+
 	app.enableCors({
 		origin: '*',
 	});
+	await app.startAllMicroservices();
 	app.useGlobalPipes(new ValidationPipe({ transform: true }));
+	app.useGlobalFilters(new AllExceptionsFilter());
+	app.useGlobalPipes(new ValidationPipe());
+	app.useGlobalInterceptors(new GlobalResponseTransformer());
 
 	if (process.env.NODE_ENV !== 'production_environment') {
 		setupSwagger(app);
