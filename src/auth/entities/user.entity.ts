@@ -1,13 +1,20 @@
-import { ModelOptions, prop } from '@typegoose/typegoose';
+import { ModelOptions, pre, prop } from '@typegoose/typegoose';
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
 
 @ModelOptions({
 	schemaOptions: {
-		collection: 'users',
+		collection: 'pending-users',
 		timestamps: true,
 	},
 })
-export class User extends TimeStamps {
+@pre<PendingUser>('save', function (next) {
+	if (!this.avatar) this.avatar = '/avatar.png';
+	this.verify = this.verify || false;
+	this.type = this.type || 'user';
+
+	next();
+})
+export class PendingUser extends TimeStamps {
 	@prop({ required: true, type: String, default: 'Username', trim: true, lowercase: true })
 	userName: string;
 
@@ -17,9 +24,6 @@ export class User extends TimeStamps {
 	@prop({ required: true, type: String })
 	password: string;
 
-	@prop({ required: true, type: String })
-	cPassword: string;
-
 	@prop({ required: false, type: String })
 	avatar?: string;
 
@@ -28,4 +32,18 @@ export class User extends TimeStamps {
 
 	@prop({ required: false, type: String })
 	type?: string;
+
+	@prop({ required: false, type: String })
+	verificationToken?: string;
+
+	@prop({ required: false, type: Date })
+	tokenExpiration?: Date;
 }
+
+@ModelOptions({
+	schemaOptions: {
+		collection: 'users',
+		timestamps: true,
+	},
+})
+export class User extends PendingUser {}

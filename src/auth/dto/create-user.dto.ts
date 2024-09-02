@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
-import { UserTypeEnum } from '../enums/user.enum';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateUserDto {
 	@ApiProperty({ required: true, type: String })
@@ -22,16 +21,4 @@ export class CreateUserDto {
 	@IsNotEmpty({ message: 'Confirm Password is required!' })
 	@IsString()
 	cPassword: string;
-
-	@ApiProperty({ required: false, type: String })
-	@IsString()
-	avatar: string;
-
-	@ApiProperty({ required: false, default: false })
-	@IsBoolean()
-	verify?: boolean;
-
-	@ApiProperty({ required: false, enum: UserTypeEnum, default: UserTypeEnum.USER })
-	@IsString()
-	type?: UserTypeEnum;
 }
