@@ -33,6 +33,10 @@ export interface IConfig {
 	redisURL: string;
 	redisHost: string;
 	redisPort: number;
+	jwtPublicKeyPath: string;
+	jwtPrivateKeyPath: string;
+	jwtSecret: string;
+	jwtExpiresIn: string;
 }
 
 dotenv.config();
@@ -43,6 +47,12 @@ const config = (): IConfig => {
 
 	const { mongodbUsername, mongodbPassword, mongodbHost, dbName } = mongoConfig;
 	const { redisHost, redisPort } = redisConfig;
+	const {
+		JWT_PUBLIC_KEY_PATH: jwtPublicKeyPath,
+		JWT_PRIVATE_KEY_PATH: jwtPrivateKeyPath,
+		JWT_SECRET: jwtSecret,
+		JWT_EXPIRES_IN: jwtExpiresIn,
+	} = process.env;
 
 	const mongoURL = `mongodb+srv://${mongodbUsername}:${mongodbPassword}@${mongodbHost}/${dbName}`;
 	const redisURL = `redis://${redisHost}:${redisPort}`;
@@ -56,6 +66,10 @@ const config = (): IConfig => {
 		redisURL,
 		redisHost,
 		redisPort: parseInt(redisPort, 10),
+		jwtPrivateKeyPath,
+		jwtPublicKeyPath,
+		jwtSecret,
+		jwtExpiresIn,
 	};
 };
 

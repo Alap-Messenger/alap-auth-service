@@ -7,8 +7,10 @@ import { InjectModel } from 'nestjs-typegoose';
 import { RedisMessages } from 'src/modules/microservice-client/messages';
 import { MicroserviceClient } from 'src/modules/microservice-client/microservice-client.module';
 import { emailRegex, nameRegex, passwordRegex } from 'src/utils/validation';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { PendingUser, User } from '../entities/user.entity';
+import { CreateUserDto, LoginDto } from '../dto/auth.dto';
+import { PendingUser, User } from '../entities/auth.entity';
+import * as fs from 'fs';
+import config from 'src/config';
 
 @Injectable()
 export class AuthService {
@@ -102,6 +104,38 @@ export class AuthService {
 			console.log({ error });
 			throw new HttpException('Failed to activate user account. Please try again later.', 500);
 		}
+	}
+
+	async userLogin(body: LoginDto): Promise<any> {
+		const doc = await this.userModel.findOne({ email: body?.email });
+
+		if (!doc) throw new HttpException('User does not exist!', 404);
+
+		if (!bcrypt.compareSync(body?.password, doc.password)) throw new HttpException('Password does not match!', 404);
+		const key = fs.readFileSync(config.jwtPrivateKeyPath, 'utf8');
+		console.log({ key }, 'auth service');
+
+		const token = this.jwtService.sign(
+			{ id: doc._id.toString(), email: doc.email, userName: doc.userName },
+			{
+				privateKey: key,
+				expiresIn: config?.jwtExpiresIn,
+				algorithm: 'RS256',
+			},
+		);
+		console.log({ token });
+		return {
+			userName: doc?.userName,
+			avatar: doc?.avatar,
+			email: doc?.email,
+			token: 'Bearer ' + token,
+		};
+	}
+	async userLogout(): Promise<any> {
+		return {
+			isLoggedOut: true,
+			token: null,
+		};
 	}
 
 	async checkUserMail(body: { email: string }): Promise<PendingUser | User> {

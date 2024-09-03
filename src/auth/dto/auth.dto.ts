@@ -22,3 +22,13 @@ export class CreateUserDto {
 	@IsString()
 	cPassword: string;
 }
+
+export class LoginDto {
+	@ApiProperty({ required: true, type: String })
+	@IsString()
+	email: string;
+
+	@ApiProperty({ required: true, type: String })
+	@IsString()
+	password: string;
+}
