@@ -7,6 +7,7 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { AuthModule } from './auth/auth.module';
 import config from './config';
 import { MicroServiceClientModule } from './modules/microservice-client/microservice-client.module';
+import { UserModule } from './user/user.module';
 
 @Module({
 	imports: [
@@ -24,6 +25,7 @@ import { MicroServiceClientModule } from './modules/microservice-client/microser
 		TypegooseModule.forRoot(config.mongoURL),
 		ConfigModule.forRoot({ isGlobal: true }),
 		AuthModule,
+		UserModule,
 	],
 	providers: [
 		{

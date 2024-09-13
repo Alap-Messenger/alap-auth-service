@@ -22,7 +22,7 @@ export class AuthService {
 	) {}
 
 	async createUser(body: CreateUserDto): Promise<string> {
-		const { userName, password, cPassword, email } = body;
+		const { userName, password, email } = body;
 
 		const alreadyExists = await this.checkUserMail({ email });
 		if (alreadyExists) throw new HttpException('Email already exist. Verify your account.', 400);
@@ -35,6 +35,11 @@ export class AuthService {
 			);
 		}
 
+		// Validate email
+		if (!emailRegex.test(email)) {
+			throw new HttpException('Invalid email address.', 400);
+		}
+
 		// Validate password
 		if (!passwordRegex.test(password)) {
 			throw new HttpException(
@@ -43,13 +48,9 @@ export class AuthService {
 			);
 		}
 
-		// Check if passwords match
-		if (password !== cPassword) {
-			throw new HttpException('Passwords do not match', 400);
-		}
 		const verificationToken = randomBytes(32).toString('hex');
 		const tokenExpiration = new Date();
-		tokenExpiration.setHours(tokenExpiration.getHours() + 24); // Token valid for 24 hours
+		tokenExpiration.setHours(tokenExpiration.getHours() + 24);
 
 		const userData: PendingUser = {
 			userName,
@@ -107,13 +108,15 @@ export class AuthService {
 	}
 
 	async userLogin(body: LoginDto): Promise<any> {
+		if (!emailRegex.test(body?.email)) throw new HttpException('Invalid email format.', 400);
+		if (!body?.password) throw new HttpException('Invalid password', 400);
+
 		const doc = await this.userModel.findOne({ email: body?.email });
 
-		if (!doc) throw new HttpException('User does not exist!', 404);
+		if (!doc) throw new HttpException('User does not exist! Please register first.', 404);
 
 		if (!bcrypt.compareSync(body?.password, doc.password)) throw new HttpException('Password does not match!', 404);
 		const key = fs.readFileSync(config.jwtPrivateKeyPath, 'utf8');
-		console.log({ key }, 'auth service');
 
 		const token = this.jwtService.sign(
 			{ id: doc._id.toString(), email: doc.email, userName: doc.userName },
@@ -123,10 +126,10 @@ export class AuthService {
 				algorithm: 'RS256',
 			},
 		);
-		console.log({ token });
+
 		return {
+			id: doc?.id,
 			userName: doc?.userName,
-			avatar: doc?.avatar,
 			email: doc?.email,
 			token: 'Bearer ' + token,
 		};

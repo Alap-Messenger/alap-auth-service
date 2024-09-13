@@ -8,7 +8,7 @@ import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
 	},
 })
 @pre<PendingUser>('save', function (next) {
-	if (!this.avatar) this.avatar = '/avatar.png';
+	if (!this.avatar) this.avatar = '';
 	this.verify = this.verify || false;
 	this.type = this.type || 'user';
 

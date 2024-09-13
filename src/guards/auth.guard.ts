@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, HttpException, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { Observable } from 'rxjs';
 import * as fs from 'fs';
@@ -10,7 +10,7 @@ export class AuthGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const token = request.headers.authorization;
 
-		if (!token) throw new HttpException('User not authenticated!', 403);
+		if (!token) throw new UnauthorizedException();
 		try {
 			const key = fs.readFileSync(config.jwtPublicKeyPath, 'utf8');
 			const mainToken = token.split(' ').pop();

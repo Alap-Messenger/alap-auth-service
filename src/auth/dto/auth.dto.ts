@@ -16,11 +16,6 @@ export class CreateUserDto {
 	@IsNotEmpty({ message: 'Password is required!' })
 	@IsString()
 	password: string;
-
-	@ApiProperty({ required: true, type: String })
-	@IsNotEmpty({ message: 'Confirm Password is required!' })
-	@IsString()
-	cPassword: string;
 }
 
 export class LoginDto {

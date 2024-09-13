@@ -1,22 +1,22 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { AuthGuard } from '../../guards/auth.guard';
 import { CreateUserDto, LoginDto } from '../dto/auth.dto';
 import { AuthService } from '../services/auth.service';
-import { AuthGuard } from '../guards/auth.guard';
 
+@ApiTags('Auth Related Operations')
 @Controller('auth')
 export class AuthController {
-	constructor(@Inject(AuthService) private readonly authService: AuthService) {}
+	constructor(private readonly authService: AuthService) {}
 
 	@Throttle({ Option: { ttl: 86400, limit: 5 } })
-	@ApiTags('Auth Related Operations')
 	@Post('create-user')
 	async createUser(@Body() body: CreateUserDto) {
 		return this.authService.createUser(body);
 	}
 
-	@Throttle({ Option: { ttl: 86400, limit: 1 } })
+	@Throttle({ Option: { ttl: 1, limit: 1 } })
 	@Post('login-user')
 	async userLogin(@Body() body: LoginDto) {
 		return this.authService.userLogin(body);
