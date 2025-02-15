@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthResolver } from './auth.resolver';
+import { AuthResolver } from './resolvers/auth.resolver';
+import { AuthService } from './services/auth.service';
 
 @Module({
   providers: [AuthResolver, AuthService],

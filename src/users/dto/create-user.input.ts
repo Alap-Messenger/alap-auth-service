@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { emailRegex, passwordRegex } from 'src/utils/validation';
 
 @InputType()
@@ -23,4 +23,9 @@ export class CreateUserInput {
       'Password must be between 6-12 characters long and contain at least one uppercase letter, one number, and one special character!',
   })
   password: string;
+
+  @Field(() => Boolean, { description: 'Email verified or not.' })
+  @IsNotEmpty()
+  @IsBoolean({ message: 'This field is required!' })
+  isEmailVerified: boolean;
 }

@@ -50,8 +50,13 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: '*',
+    origin:
+      configService.getOrThrow<string>('env') === 'production'
+        ? configService.getOrThrow<string>('publicSiteProduction')
+        : configService.getOrThrow<string>('publicSiteLocal'),
+    credentials: true,
   });
+
   await app.startAllMicroservices();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new AllExceptionsFilter());
